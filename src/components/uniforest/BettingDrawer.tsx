@@ -47,7 +47,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
         setTxHash(hookTxHash ?? null);
         setStep("success");
       } else {
-        setError("Transação falhou. Tente novamente.");
+        setError("Transaction failed. Please try again.");
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -98,7 +98,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
               {/* ── Header ──────────────────────────────────────────── */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-black text-gray-800">
-                  {step === "success" ? "🦄 Aposta Confirmada!" : "Fazer Aposta"}
+                  {step === "success" ? "🦄 Bet Confirmed!" : "Place a Bet"}
                 </h2>
                 <button
                   onClick={onClose}
@@ -127,7 +127,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                       }`}
                       style={isBlue ? { background: "linear-gradient(135deg, #007AFF, #60A5FA)" } : {}}
                     >
-                      SIM 🔵  {yesPercent(market)}%
+                      YES 🔵  {yesPercent(market)}%
                     </button>
                     <button
                       onClick={() => setSide("no")}
@@ -138,13 +138,13 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                       }`}
                       style={!isBlue ? { background: "linear-gradient(135deg, #FF007A, #FB7185)" } : {}}
                     >
-                      NÃO 🌸  {100 - yesPercent(market)}%
+                      NO 🌸  {100 - yesPercent(market)}%
                     </button>
                   </div>
 
                   {/* Amount presets */}
                   <div>
-                    <div className="text-xs font-semibold text-gray-500 mb-2">Valor (USDm)</div>
+                    <div className="text-xs font-semibold text-gray-500 mb-2">Amount (USDm)</div>
                     <div className="grid grid-cols-4 gap-2 mb-3">
                       {PRESETS.map(p => (
                         <button
@@ -182,7 +182,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
 
                   {/* Balance */}
                   <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>Saldo disponível</span>
+                    <span>Available balance</span>
                     <span className="font-semibold text-gray-600">{formatUSDm(balance)} USDm</span>
                   </div>
 
@@ -191,7 +191,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                     <div className={`flex items-center justify-between px-4 py-3 rounded-2xl ${
                       isBlue ? "bg-blue-50" : "bg-pink-50"
                     }`}>
-                      <span className="text-xs font-medium text-gray-500">Ganho potencial</span>
+                      <span className="text-xs font-medium text-gray-500">Potential payout</span>
                       <span className={`text-sm font-black ${isBlue ? "text-uniblue" : "text-unipink"}`}>
                         {calcPotentialWin(market, side, amountNum)}× 🦄
                       </span>
@@ -212,7 +212,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                       : "linear-gradient(135deg, #FF007A, #FB7185)"
                     }}
                   >
-                    Continuar →
+                    Continue →
                   </motion.button>
                 </div>
               )}
@@ -223,10 +223,10 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                   <div className={`rounded-2xl p-4 ${isBlue ? "bg-blue-50" : "bg-pink-50"}`}>
                     <div className="space-y-3">
                       {[
-                        { label: "Direção", value: side === "yes" ? "SIM 🔵" : "NÃO 🌸" },
-                        { label: "Valor",    value: `${amountNum} USDm` },
-                        { label: "Taxa",     value: "2%" },
-                        { label: "Líquido",  value: `${(amountNum * 0.98).toFixed(2)} USDm` },
+                        { label: "Direction", value: side === "yes" ? "YES 🔵" : "NO 🌸" },
+                        { label: "Amount",    value: `${amountNum} USDm` },
+                        { label: "Fee",       value: "2%" },
+                        { label: "Net",       value: `${(amountNum * 0.98).toFixed(2)} USDm` },
                       ].map(({ label, value }) => (
                         <div key={label} className="flex justify-between text-sm">
                           <span className="text-gray-500">{label}</span>
@@ -245,7 +245,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                       onClick={() => setStep("bet")}
                       className="flex-1 py-3 rounded-2xl text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
                     >
-                      Voltar
+                      Back
                     </button>
                     <motion.button
                       whileTap={{ scale: 0.95 }}
@@ -260,9 +260,9 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                       {loading ? (
                         <span className="flex items-center justify-center gap-2">
                           <span className="animate-spin text-base">✦</span>
-                          Enviando...
+                          Sending...
                         </span>
-                      ) : "Confirmar Aposta 🦄"}
+                      ) : "Confirm Bet 🦄"}
                     </motion.button>
                   </div>
                 </div>
@@ -277,10 +277,10 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                 >
                   <div className="text-6xl">🦄✨</div>
                   <div>
-                    <p className="font-black text-gray-800 text-lg">Aposta realizada!</p>
+                    <p className="font-black text-gray-800 text-lg">Bet placed!</p>
                     <p className="text-sm text-gray-500 mt-1">
-                      {amountNum} USDm em <span className={isBlue ? "text-uniblue" : "text-unipink"}>
-                        {side === "yes" ? "SIM" : "NÃO"}
+                      {amountNum} USDm on <span className={isBlue ? "text-uniblue" : "text-unipink"}>
+                        {side === "yes" ? "YES" : "NO"}
                       </span>
                     </p>
                   </div>
@@ -291,7 +291,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                       rel="noreferrer"
                       className="inline-flex items-center gap-1.5 text-xs text-violet-500 underline underline-offset-2"
                     >
-                      Ver transação ↗
+                      View transaction ↗
                     </a>
                   )}
                   <motion.button
@@ -300,7 +300,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                     className="w-full py-4 rounded-2xl text-base font-black text-white"
                     style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6, #FF007A)" }}
                   >
-                    Fechar ✦
+                    Close ✦
                   </motion.button>
                 </motion.div>
               )}

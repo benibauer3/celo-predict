@@ -71,7 +71,7 @@ export function UnicornHeader({ search, setSearch, onCreateMarket }: Props) {
                 className="px-4 py-2 rounded-xl text-sm font-bold text-white shadow-uni-blue"
                 style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6)" }}
               >
-                Conectar
+                Connect
               </motion.button>
             )
           )}
@@ -94,7 +94,7 @@ export function UnicornHeader({ search, setSearch, onCreateMarket }: Props) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="O que o Unicórnio deve buscar hoje?"
+              placeholder="What should the Unicorn find today?"
               className="w-full px-3 py-3 text-sm text-gray-700 placeholder:text-gray-400 bg-transparent outline-none"
             />
             {search && (

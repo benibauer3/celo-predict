@@ -66,11 +66,11 @@ export function MarketCard({ market, index = 0, onBet }: Props) {
                 ? "bg-blue-50 text-uniblue"
                 : "bg-pink-50 text-unipink"
             }`}>
-              {market.outcome ? "SIM ✓" : "NÃO ✓"}
+              {market.outcome ? "YES ✓" : "NO ✓"}
             </span>
           ) : isOver ? (
             <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-              Encerrado
+              Closed
             </span>
           ) : (
             <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-violet-50 text-violet-500">
@@ -83,14 +83,14 @@ export function MarketCard({ market, index = 0, onBet }: Props) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">
             <span className="text-2xl font-black text-uniblue">{pct}%</span>
-            <span className="text-xs text-gray-400 font-medium">SIM</span>
+            <span className="text-xs text-gray-400 font-medium">YES</span>
           </div>
           <div className="text-center">
-            <div className="text-xs text-gray-400">Volume</div>
+            <div className="text-xs text-gray-400">Pool</div>
             <div className="text-xs font-semibold text-gray-600">{formatUSDm(total)} USDm</div>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-gray-400 font-medium">NÃO</span>
+            <span className="text-xs text-gray-400 font-medium">NO</span>
             <span className="text-2xl font-black text-unipink">{100 - pct}%</span>
           </div>
         </div>
@@ -116,7 +116,7 @@ export function MarketCard({ market, index = 0, onBet }: Props) {
               className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white shadow-uni-blue"
               style={{ background: "linear-gradient(135deg, #007AFF, #60A5FA)" }}
             >
-              Sim 🔵
+              Yes 🔵
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.93 }}
@@ -124,7 +124,7 @@ export function MarketCard({ market, index = 0, onBet }: Props) {
               className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white shadow-uni-pink"
               style={{ background: "linear-gradient(135deg, #FF007A, #FB7185)" }}
             >
-              Não 🌸
+              No 🌸
             </motion.button>
           </div>
         )}
@@ -136,7 +136,7 @@ export function MarketCard({ market, index = 0, onBet }: Props) {
               ? "bg-blue-50 text-uniblue"
               : "bg-pink-50 text-unipink"
           }`}>
-            Resultado: {market.outcome ? "SIM 🦄" : "NÃO 🌸"}
+            Result: {market.outcome ? "YES 🦄" : "NO 🌸"}
           </div>
         )}
       </div>

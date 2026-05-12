@@ -144,9 +144,9 @@ function UniforesApp({ onCreateMarket }: { onCreateMarket: () => void }) {
       <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-100">
         <div className="max-w-2xl mx-auto flex">
           {([
-            { id: "markets",     label: "Mercados",  icon: "🔮" },
-            { id: "positions",   label: "Apostas",   icon: "💎" },
-            { id: "leaderboard", label: "Ranking",   icon: "🏆" },
+            { id: "markets",     label: "Markets",  icon: "🔮" },
+            { id: "positions",   label: "My Bets",   icon: "💎" },
+            { id: "leaderboard", label: "Leaderboard",   icon: "🏆" },
           ] as { id: AppTab; label: string; icon: string }[]).map(t => (
             <button
               key={t.id}
@@ -188,9 +188,9 @@ function EmptyState({ search }: { search: string }) {
     >
       <div className="text-5xl">🦄</div>
       <p className="font-bold text-gray-600">
-        {search ? `Nada sobre "${search}"` : "Nenhum mercado aberto"}
+        {search ? `Nothing found for "${search}"` : "No open markets"}
       </p>
-      <p className="text-sm text-gray-400">O unicórnio ainda está a caminho…</p>
+      <p className="text-sm text-gray-400">The unicorn is still on its way…</p>
     </motion.div>
   );
 }
@@ -201,8 +201,8 @@ function PositionsTab({ positions }: { positions: PositionWithPnL[] }) {
     return (
       <div className="text-center py-16 space-y-3">
         <div className="text-5xl">💎</div>
-        <p className="font-bold text-gray-600">Sem apostas ainda</p>
-        <p className="text-sm text-gray-400">Vá em Mercados e faça sua primeira aposta!</p>
+        <p className="font-bold text-gray-600">No bets yet</p>
+        <p className="text-sm text-gray-400">Head to Markets and place your first bet!</p>
       </div>
     );
   }
@@ -221,13 +221,13 @@ function PositionsTab({ positions }: { positions: PositionWithPnL[] }) {
             <div className="flex gap-3">
               {p.yesAmount > 0n && (
                 <div className="flex-1 bg-blue-50 rounded-xl px-3 py-2 text-center">
-                  <div className="text-xs text-gray-500">SIM</div>
+                  <div className="text-xs text-gray-500">YES</div>
                   <div className="text-sm font-bold text-uniblue">{formatUSDm(p.yesAmount)}</div>
                 </div>
               )}
               {p.noAmount > 0n && (
                 <div className="flex-1 bg-pink-50 rounded-xl px-3 py-2 text-center">
-                  <div className="text-xs text-gray-500">NÃO</div>
+                  <div className="text-xs text-gray-500">NO</div>
                   <div className="text-sm font-bold text-unipink">{formatUSDm(p.noAmount)}</div>
                 </div>
               )}
@@ -240,7 +240,7 @@ function PositionsTab({ positions }: { positions: PositionWithPnL[] }) {
             </div>
             {p.market.resolved && !p.claimed && p.isWinner && (
               <div className="bg-gradient-to-r from-uniblue to-violet-500 text-white text-center text-xs font-bold rounded-2xl py-2">
-                🎉 Você ganhou! Resgate disponível
+                🎉 You won! Claim available
               </div>
             )}
           </motion.div>
@@ -267,8 +267,8 @@ function LeaderboardTab({ entries, loading }: { entries: LeaderboardEntry[]; loa
     return (
       <div className="text-center py-16 space-y-3">
         <div className="text-5xl">🏆</div>
-        <p className="font-bold text-gray-600">Ranking vazio</p>
-        <p className="text-sm text-gray-400">Faça apostas para aparecer aqui!</p>
+        <p className="font-bold text-gray-600">Leaderboard empty</p>
+        <p className="text-sm text-gray-400">Place bets to appear here!</p>
       </div>
     );
   }
@@ -296,7 +296,7 @@ function LeaderboardTab({ entries, loading }: { entries: LeaderboardEntry[]; loa
               <p className="text-xs font-mono text-gray-700 truncate">
                 {e.address.slice(0, 6)}…{e.address.slice(-4)}
               </p>
-              <p className="text-[10px] text-gray-400">{e.betsCount} apostas · {e.marketsCount} mercados</p>
+              <p className="text-[10px] text-gray-400">{e.betsCount} bets · {e.marketsCount} markets</p>
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-sm font-black text-gray-800">{formatUSDm(e.volume)}</p>
@@ -338,7 +338,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
                 onClick={() => connect({ connector: injected() })}
                 className="px-4 py-2 text-sm font-bold rounded-xl border border-uniblue/30 text-uniblue hover:bg-uniblue/5 transition-colors"
               >
-                Conectar
+                Connect
               </button>
             )}
             <motion.button
@@ -347,7 +347,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
               className="px-4 py-2 text-sm font-black rounded-xl text-white shadow-uni-blue"
               style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6)" }}
             >
-              {isConnected ? "Abrir App →" : "Começar →"}
+              {isConnected ? "Open App →" : "Get Started →"}
             </motion.button>
           </div>
         </div>
@@ -373,17 +373,17 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           {/* Live badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-uniblue/20 text-uniblue text-xs font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-uniblue animate-pulse" />
-            Live na Celo · Taxas em USDm · MiniPay ready
+            Live on Celo · Fees in USDm · MiniPay ready
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-800 leading-tight tracking-tight">
-            Preveja o futuro.<br />
-            <span className="uni-gradient-text">Ganhe USDm.</span>
+            Predict the future.<br />
+            <span className="uni-gradient-text">Win USDm.</span>
           </h1>
 
           <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Mercados de previsão binários na Celo.
-            Aposte SIM ou NÃO em qualquer evento usando USDm — sem ETH, sem CELO, sem complicação.
+            Binary prediction markets on Celo.
+            Bet YES or NO on any event using USDm — no ETH, no CELO, no friction.
           </p>
 
           {/* CTAs */}
@@ -394,19 +394,19 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
               className="w-full sm:w-auto px-8 py-4 rounded-2xl font-black text-base text-white shadow-uni-blue"
               style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6, #FF007A)" }}
             >
-              {isConnected ? "Abrir Mercados →" : "Começar a Prever →"}
+              {isConnected ? "Open Markets →" : "Start Predicting →"}
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={onLaunch}
               className="w-full sm:w-auto px-8 py-4 rounded-2xl font-bold text-base text-gray-700 border-2 border-gray-200 hover:border-uniblue/30 transition-colors"
             >
-              Ver Mercados 🔮
+              Browse Markets 🔮
             </motion.button>
           </div>
 
           <p className="text-xs text-gray-400">
-            Não-custodial · Open-source · 2% de taxa · Sem CELO necessário
+            Non-custodial · Open-source · 2% protocol fee · No CELO needed
           </p>
         </motion.div>
       </section>
@@ -415,10 +415,10 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
       <section className="border-t border-gray-100 bg-white/60 backdrop-blur py-8">
         <div className="max-w-3xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           {[
-            { label: "Mercados criados", value: Number(total), suffix: "+" },
-            { label: "Taxa de rede",     value: 0,             suffix: " USDm" },
-            { label: "Tempo de bloco",   value: 1,             suffix: "s" },
-            { label: "Taxa do protocolo",value: 2,             suffix: "%" },
+            { label: "Markets created",  value: Number(total), suffix: "+" },
+            { label: "Network fee",      value: 0,             suffix: " USDm" },
+            { label: "Block time",       value: 1,             suffix: "s" },
+            { label: "Protocol fee",     value: 2,             suffix: "%" },
           ].map(s => (
             <div key={s.label} className="space-y-1">
               <p className="text-2xl font-extrabold uni-gradient-text">
@@ -435,8 +435,8 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
-              <p className="text-uniblue text-sm font-semibold mb-1">Ao vivo agora</p>
-              <h2 className="text-2xl font-black text-gray-800">Mercados Abertos</h2>
+              <p className="text-uniblue text-sm font-semibold mb-1">Live now</p>
+              <h2 className="text-2xl font-black text-gray-800">Open Markets</h2>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               {markets.slice(0, 4).map((m, i) => (
@@ -455,7 +455,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
                 className="px-8 py-3.5 rounded-2xl font-black text-white shadow-uni-blue"
                 style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6)" }}
               >
-                Ver todos os mercados →
+                See all markets →
               </motion.button>
             </div>
           </div>
@@ -466,15 +466,15 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
       <section className="py-16 px-4 bg-white/40 backdrop-blur border-y border-gray-100">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-unipink text-sm font-semibold mb-1">Simples e mágico</p>
-            <h2 className="text-2xl font-black text-gray-800">Como funciona</h2>
+            <p className="text-unipink text-sm font-semibold mb-1">Simple & magical</p>
+            <h2 className="text-2xl font-black text-gray-800">How it works</h2>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {[
-              { icon: "🦄", step: "01", title: "Conecte sua carteira",        desc: "Use MiniPay ou qualquer carteira EVM. Taxas pagas automaticamente em USDm." },
-              { icon: "🔮", step: "02", title: "Escolha um mercado",          desc: "Navegue por mercados de crypto, esportes, política ou qualquer evento." },
-              { icon: "💎", step: "03", title: "Aposte SIM ou NÃO",           desc: "Deposite USDm. Sua aposta vai para o pool SIM ou NÃO. As odds ajustam em tempo real." },
-              { icon: "✨", step: "04", title: "Resgate seus ganhos",          desc: "Quando o mercado resolve, os vencedores dividem o pool perdedor proporcionalmente." },
+              { icon: "🦄", step: "01", title: "Connect your wallet",   desc: "Use MiniPay or any EVM wallet. Network fees are paid automatically in USDm." },
+              { icon: "🔮", step: "02", title: "Pick a market",         desc: "Browse markets on crypto, sports, politics, or any event you care about." },
+              { icon: "💎", step: "03", title: "Bet YES or NO",         desc: "Deposit USDm. Your stake goes into the YES or NO pool. Odds adjust in real time." },
+              { icon: "✨", step: "04", title: "Claim your winnings",   desc: "When a market resolves, winners split the losing pool proportionally to their stake." },
             ].map(s => (
               <motion.div
                 key={s.step}
@@ -495,17 +495,17 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
       <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-violet-500 text-sm font-semibold mb-1">Construído na Celo</p>
-            <h2 className="text-2xl font-black text-gray-800">Por que Uniforest?</h2>
+            <p className="text-violet-500 text-sm font-semibold mb-1">Built on Celo</p>
+            <h2 className="text-2xl font-black text-gray-800">Why Uniforest?</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
-              { icon: "⚡", title: "~1s por bloco",      desc: "Apostas confirmadas na hora." },
-              { icon: "💵", title: "Taxas em USDm",      desc: "CIP-64. Sem CELO, jamais." },
-              { icon: "📱", title: "Nativo no MiniPay",  desc: "Auto-connect. Feito para mobile." },
-              { icon: "📊", title: "Gráficos on-chain",  desc: "Histórico real de probabilidade." },
-              { icon: "⚖️", title: "Payouts justos",     desc: "Proporcional ao stake. Matemática limpa." },
-              { icon: "🔍", title: "100% on-chain",      desc: "Sem backend, sem custódia." },
+              { icon: "⚡", title: "~1s block time",      desc: "Bets confirmed instantly." },
+              { icon: "💵", title: "Fees in USDm",       desc: "CIP-64 fee abstraction. Zero CELO, ever." },
+              { icon: "📱", title: "MiniPay native",     desc: "Auto-connect. Designed for mobile." },
+              { icon: "📊", title: "On-chain charts",    desc: "Real probability history from events." },
+              { icon: "⚖️", title: "Fair payouts",       desc: "Proportional to stake. Clean math." },
+              { icon: "🔍", title: "100% on-chain",      desc: "No backend, no custody." },
             ].map(f => (
               <div key={f.title} className="bg-white rounded-2xl border border-gray-100 shadow-uni-card p-4">
                 <div className="text-2xl mb-2">{f.icon}</div>
@@ -524,15 +524,15 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
         </div>
         <div className="relative max-w-lg mx-auto space-y-5">
           <div className="text-5xl">🦄✨</div>
-          <h2 className="text-3xl font-extrabold text-gray-800">Pronto para sua primeira previsão?</h2>
-          <p className="text-gray-500 text-sm">Junte-se ao Uniforest. Rápido, barato e totalmente on-chain.</p>
+          <h2 className="text-3xl font-extrabold text-gray-800">Ready to make your first prediction?</h2>
+          <p className="text-gray-500 text-sm">Join Uniforest. Fast, cheap, and fully on-chain.</p>
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={handleCTA}
             className="w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-base text-white shadow-uni-blue"
             style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6, #FF007A)" }}
           >
-            {isConnected ? "Abrir Mercados →" : "Começar Agora →"}
+            {isConnected ? "Open Markets →" : "Get Started →"}
           </motion.button>
         </div>
       </section>
@@ -542,7 +542,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
           <div className="flex items-center gap-2">
             <span className="uni-gradient-text font-black">Uniforest</span>
-            <span>— construído na Celo L2</span>
+            <span>— built on Celo L2</span>
           </div>
           <div className="flex items-center gap-4">
             <a href="https://celoscan.io" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 transition-colors">Celoscan</a>
