@@ -6,7 +6,7 @@ import { useAccount, useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 
 import { SparklesCursor }   from "@/components/uniforest/SparklesCursor";
-import { UnicornLogo, UniforesWordmark } from "@/components/uniforest/UnicornLogo";
+import { SuerteLogo, SuerteLogoHorizontal } from "@/components/suerte/SuerteLogo";
 import { UnicornHeader }    from "@/components/uniforest/UnicornHeader";
 import { MarketCard, MarketCardSkeleton } from "@/components/uniforest/MarketCard";
 import { BettingDrawer }    from "@/components/uniforest/BettingDrawer";
@@ -76,7 +76,7 @@ function UniforesApp({ onCreateMarket }: { onCreateMarket: () => void }) {
   }
 
   return (
-    <div className="min-h-screen uniforest-bg pb-24">
+    <div className="min-h-screen uniforest-bg pb-24" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
       <UnicornHeader
         search={search}
         setSearch={setSearch}
@@ -190,7 +190,7 @@ function EmptyState({ search }: { search: string }) {
       <p className="font-bold text-gray-600">
         {search ? `Nothing found for "${search}"` : "No open markets"}
       </p>
-      <p className="text-sm text-gray-400">The unicorn is still on its way…</p>
+      <p className="text-sm text-gray-400">Suerte is working on new markets…</p>
     </motion.div>
   );
 }
@@ -328,10 +328,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
       {/* Landing nav */}
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <UnicornLogo size={32} animated />
-            <UniforesWordmark size="md" />
-          </div>
+          <SuerteLogoHorizontal size={36} />
           <div className="flex items-center gap-2">
             {!isMiniPay() && !isConnected && (
               <button
@@ -366,8 +363,8 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           className="relative z-10 max-w-2xl space-y-6"
         >
           {/* Logo */}
-          <div className="flex justify-center mb-4">
-            <UnicornLogo size={80} animated />
+          <div className="flex justify-center mb-2">
+            <SuerteLogo size={140} animated showText textSize="xl" />
           </div>
 
           {/* Live badge */}
@@ -376,9 +373,11 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
             Live on Celo · Fees in USDT, USDC, USDm or CELO · MiniPay ready
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-800 leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-800 leading-tight tracking-tight">
             Predict the future.<br />
-            <span className="uni-gradient-text">Earn USDm & USDT.</span>
+            <span style={{ background: "linear-gradient(135deg,#007AFF,#8B5CF6,#FF007A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              Earn USDm &amp; USDT.
+            </span>
           </h1>
 
           <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
@@ -522,7 +521,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
             <p className="text-violet-500 text-sm font-semibold mb-1">Built on Celo</p>
-            <h2 className="text-2xl font-black text-gray-800">Why Uniforest?</h2>
+            <h2 className="text-2xl font-black text-gray-800">Why Suerte Market?</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
@@ -627,7 +626,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
         <div className="relative max-w-lg mx-auto space-y-5">
           <div className="text-5xl">🦄✨</div>
           <h2 className="text-3xl font-extrabold text-gray-800">Ready to earn your first USDm reward?</h2>
-          <p className="text-gray-500 text-sm">Join Uniforest. Predict, win, and get paid in stablecoins.</p>
+          <p className="text-gray-500 text-sm">Join Suerte Market. Predict, win, and get paid in stablecoins.</p>
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={handleCTA}
@@ -643,7 +642,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
       <footer className="border-t border-gray-100 py-6 px-4">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
           <div className="flex items-center gap-2">
-            <span className="uni-gradient-text font-black">Uniforest</span>
+            <span style={{ background: "linear-gradient(135deg,#007AFF,#FF007A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }} className="font-black">Suerte Market</span>
             <span>— built on Celo L2</span>
           </div>
           <div className="flex items-center gap-4">

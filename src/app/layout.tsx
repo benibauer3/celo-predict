@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Celo Prediction",
-  description: "Decentralized prediction markets on Celo — bet with USDm stablecoins",
+  title: "Suerte Market",
+  description: "Suerte Market — prediction markets on Celo. Bet YES or NO, earn USDm & USDT stablecoins.",
 };
 
 export const viewport: Viewport = {
