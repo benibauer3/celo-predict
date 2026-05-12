@@ -1,17 +1,37 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAccount, useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
-import { BetModal } from "@/components/BetModal";
-import { CreateMarketModal } from "@/components/CreateMarketModal";
-import { PredictionMarket } from "@/components/PredictionMarket";
-import { useMarkets, type Market } from "@/hooks/usePredictionMarket";
-import { formatUSDm, formatPercent, timeLeft } from "@/lib/clients";
 
+import { SparklesCursor }   from "@/components/uniforest/SparklesCursor";
+import { UnicornLogo, UniforesWordmark } from "@/components/uniforest/UnicornLogo";
+import { UnicornHeader }    from "@/components/uniforest/UnicornHeader";
+import { MarketCard, MarketCardSkeleton } from "@/components/uniforest/MarketCard";
+import { BettingDrawer }    from "@/components/uniforest/BettingDrawer";
+import { CreateMarketModal } from "@/components/CreateMarketModal";
+
+import {
+  useMarkets,
+  useMyPositions,
+  useLeaderboard,
+  type Market,
+  type PositionWithPnL,
+  type LeaderboardEntry,
+} from "@/hooks/usePredictionMarket";
+import { formatUSDm, timeLeft } from "@/lib/clients";
+
+// ─── helpers ─────────────────────────────────────────────────────────────────
 function isMiniPay() {
   return typeof window !== "undefined" &&
     (window as { ethereum?: { isMiniPay?: boolean } }).ethereum?.isMiniPay === true;
+}
+
+function yesPercent(m: Market): number {
+  const total = m.yesPool + m.noPool;
+  if (total === 0n) return 50;
+  return Math.round(Number((m.yesPool * 100n) / total));
 }
 
 // ─── Animated counter ─────────────────────────────────────────────────────────
@@ -30,306 +50,539 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   return <>{val.toLocaleString()}{suffix}</>;
 }
 
-// ─── Nav ──────────────────────────────────────────────────────────────────────
-function Nav({ onLaunch }: { onLaunch: () => void }) {
-  const { isConnected, address } = useAccount();
-  const { connect } = useConnect();
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", h);
-    return () => window.removeEventListener("scroll", h);
-  }, []);
+// ══════════════════════════════════════════════════════════════════════════════
+//  UNIFOREST APP (view = "app")
+// ══════════════════════════════════════════════════════════════════════════════
+
+type AppTab = "markets" | "positions" | "leaderboard";
+
+function UniforesApp({ onCreateMarket }: { onCreateMarket: () => void }) {
+  const [tab, setTab]             = useState<AppTab>("markets");
+  const [search, setSearch]       = useState("");
+  const [drawerMarket, setDrawerMarket] = useState<Market | null>(null);
+  const [drawerSide, setDrawerSide]     = useState<"yes" | "no">("yes");
+
+  const { markets, loading } = useMarkets(40);
+  const { positions }        = useMyPositions(markets);
+  const { entries: leaders, loading: lLoading } = useLeaderboard();
+
+  const filtered = markets.filter(m =>
+    m.question.toLowerCase().includes(search.toLowerCase())
+  );
+
+  function openBet(m: Market, side: "yes" | "no") {
+    setDrawerMarket(m);
+    setDrawerSide(side);
+  }
+
   return (
-    <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#0A0A14]/95 backdrop-blur border-b border-white/10" : ""}`}>
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#35D07F] to-[#FBCC5C] flex items-center justify-center">
-            <span className="text-black font-black text-sm">◈</span>
-          </div>
-          <span className="font-bold text-white text-lg tracking-tight">
-            Celo<span className="text-[#35D07F]">Predict</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          {!isMiniPay() && !isConnected && (
-            <button onClick={() => connect({ connector: injected() })} className="px-4 py-2 text-sm font-medium rounded-xl border border-[#35D07F]/40 text-[#35D07F] hover:bg-[#35D07F]/10 transition-colors">
-              Connect
-            </button>
+    <div className="min-h-screen uniforest-bg pb-24">
+      <UnicornHeader
+        search={search}
+        setSearch={setSearch}
+        onCreateMarket={onCreateMarket}
+      />
+
+      {/* ── Content ─────────────────────────────────────────────────── */}
+      <main className="max-w-2xl mx-auto px-4 pt-4">
+        <AnimatePresence mode="wait">
+          {/* Markets tab */}
+          {tab === "markets" && (
+            <motion.div
+              key="markets"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="space-y-3"
+            >
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <MarketCardSkeleton key={i} index={i} />
+                ))
+              ) : filtered.length === 0 ? (
+                <EmptyState search={search} />
+              ) : (
+                filtered.map((m, i) => (
+                  <MarketCard
+                    key={String(m.id)}
+                    market={m}
+                    index={i}
+                    onBet={openBet}
+                  />
+                ))
+              )}
+            </motion.div>
           )}
-          <button onClick={onLaunch} className="px-5 py-2 text-sm font-semibold rounded-xl bg-[#35D07F] text-black hover:bg-[#35D07F]/90 transition-all active:scale-95">
-            {isConnected ? `${address?.slice(0, 6)}…${address?.slice(-4)}` : "Launch App"}
-          </button>
+
+          {/* My Positions tab */}
+          {tab === "positions" && (
+            <motion.div
+              key="positions"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <PositionsTab positions={positions} />
+            </motion.div>
+          )}
+
+          {/* Leaderboard tab */}
+          {tab === "leaderboard" && (
+            <motion.div
+              key="leaderboard"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <LeaderboardTab entries={leaders} loading={lLoading} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* ── Bottom nav ──────────────────────────────────────────────── */}
+      <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-100">
+        <div className="max-w-2xl mx-auto flex">
+          {([
+            { id: "markets",     label: "Mercados",  icon: "🔮" },
+            { id: "positions",   label: "Apostas",   icon: "💎" },
+            { id: "leaderboard", label: "Ranking",   icon: "🏆" },
+          ] as { id: AppTab; label: string; icon: string }[]).map(t => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`flex-1 flex flex-col items-center gap-0.5 py-3 text-[10px] font-semibold transition-colors ${
+                tab === t.id ? "text-uniblue" : "text-gray-400"
+              }`}
+            >
+              <span className="text-xl leading-none">{t.icon}</span>
+              {t.label}
+              {tab === t.id && (
+                <motion.div
+                  layoutId="tab-indicator"
+                  className="absolute bottom-0 h-0.5 w-8 rounded-full bg-uniblue"
+                />
+              )}
+            </button>
+          ))}
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* ── Betting Drawer ──────────────────────────────────────────── */}
+      <BettingDrawer
+        market={drawerMarket}
+        initialSide={drawerSide}
+        onClose={() => setDrawerMarket(null)}
+      />
+    </div>
   );
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
-function Hero({ onLaunch, onCreate }: { onLaunch: () => void; onCreate: () => void }) {
+// ─── Empty state ──────────────────────────────────────────────────────────────
+function EmptyState({ search }: { search: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="text-center py-16 space-y-3"
+    >
+      <div className="text-5xl">🦄</div>
+      <p className="font-bold text-gray-600">
+        {search ? `Nada sobre "${search}"` : "Nenhum mercado aberto"}
+      </p>
+      <p className="text-sm text-gray-400">O unicórnio ainda está a caminho…</p>
+    </motion.div>
+  );
+}
+
+// ─── Positions tab ────────────────────────────────────────────────────────────
+function PositionsTab({ positions }: { positions: PositionWithPnL[] }) {
+  if (positions.length === 0) {
+    return (
+      <div className="text-center py-16 space-y-3">
+        <div className="text-5xl">💎</div>
+        <p className="font-bold text-gray-600">Sem apostas ainda</p>
+        <p className="text-sm text-gray-400">Vá em Mercados e faça sua primeira aposta!</p>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-3">
+      {positions.map((p, i) => {
+        const pnlPos = p.pnl >= 0n;
+        return (
+          <motion.div
+            key={String(p.market.id)}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0, transition: { delay: i * 0.06 } }}
+            className="bg-white rounded-3xl border border-gray-100 shadow-uni-card p-4 space-y-3"
+          >
+            <p className="text-sm font-semibold text-gray-800 line-clamp-2">{p.market.question}</p>
+            <div className="flex gap-3">
+              {p.yesAmount > 0n && (
+                <div className="flex-1 bg-blue-50 rounded-xl px-3 py-2 text-center">
+                  <div className="text-xs text-gray-500">SIM</div>
+                  <div className="text-sm font-bold text-uniblue">{formatUSDm(p.yesAmount)}</div>
+                </div>
+              )}
+              {p.noAmount > 0n && (
+                <div className="flex-1 bg-pink-50 rounded-xl px-3 py-2 text-center">
+                  <div className="text-xs text-gray-500">NÃO</div>
+                  <div className="text-sm font-bold text-unipink">{formatUSDm(p.noAmount)}</div>
+                </div>
+              )}
+              <div className={`flex-1 rounded-xl px-3 py-2 text-center ${pnlPos ? "bg-green-50" : "bg-red-50"}`}>
+                <div className="text-xs text-gray-500">P&L</div>
+                <div className={`text-sm font-bold ${pnlPos ? "text-green-600" : "text-red-500"}`}>
+                  {pnlPos ? "+" : ""}{formatUSDm(p.pnl)}
+                </div>
+              </div>
+            </div>
+            {p.market.resolved && !p.claimed && p.isWinner && (
+              <div className="bg-gradient-to-r from-uniblue to-violet-500 text-white text-center text-xs font-bold rounded-2xl py-2">
+                🎉 Você ganhou! Resgate disponível
+              </div>
+            )}
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Leaderboard tab ──────────────────────────────────────────────────────────
+const MEDALS = ["🥇", "🥈", "🥉"];
+
+function LeaderboardTab({ entries, loading }: { entries: LeaderboardEntry[]; loading: boolean }) {
+  if (loading) {
+    return (
+      <div className="space-y-3 pt-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-16 bg-white rounded-3xl animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+  if (entries.length === 0) {
+    return (
+      <div className="text-center py-16 space-y-3">
+        <div className="text-5xl">🏆</div>
+        <p className="font-bold text-gray-600">Ranking vazio</p>
+        <p className="text-sm text-gray-400">Faça apostas para aparecer aqui!</p>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-2 pt-2">
+      {entries.map((e, i) => {
+        const hue = parseInt(e.address.slice(2, 8), 16) % 360;
+        return (
+          <motion.div
+            key={e.address}
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0, transition: { delay: i * 0.05 } }}
+            className="bg-white rounded-2xl border border-gray-100 shadow-uni-card px-4 py-3 flex items-center gap-3"
+          >
+            <span className="text-xl w-7 text-center flex-shrink-0">
+              {i < 3 ? MEDALS[i] : <span className="text-xs text-gray-400 font-mono">#{i + 1}</span>}
+            </span>
+            <div
+              className="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
+              style={{ background: `hsl(${hue}, 70%, 55%)` }}
+            >
+              {e.address.slice(2, 4).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-mono text-gray-700 truncate">
+                {e.address.slice(0, 6)}…{e.address.slice(-4)}
+              </p>
+              <p className="text-[10px] text-gray-400">{e.betsCount} apostas · {e.marketsCount} mercados</p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className="text-sm font-black text-gray-800">{formatUSDm(e.volume)}</p>
+              <p className="text-[10px] text-gray-400">USDm</p>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  UNIFOREST LANDING
+// ══════════════════════════════════════════════════════════════════════════════
+
+function LandingHero({ onLaunch }: { onLaunch: () => void }) {
   const { isConnected } = useAccount();
-  const { connect } = useConnect();
+  const { connect }     = useConnect();
+  const { markets, total } = useMarkets(4);
+
   function handleCTA() {
     if (isConnected || isMiniPay()) { onLaunch(); return; }
     connect({ connector: injected() });
   }
-  return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-16 overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#35D07F]/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#FBCC5C]/8 rounded-full blur-[80px]" />
-      </div>
-      <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
-        style={{ backgroundImage: "linear-gradient(#35D07F 1px, transparent 1px), linear-gradient(90deg, #35D07F 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-      <div className="relative z-10 max-w-3xl mx-auto text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F] text-xs font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse" />
-          Live on Celo L2 · Fees paid in USDm · MiniPay ready
-        </div>
-        <h1 className="text-4xl sm:text-6xl font-extrabold text-white leading-tight tracking-tight">
-          Predict the future.<br />
-          <span className="text-[#35D07F]">Win stablecoins.</span>
-        </h1>
-        <p className="text-[#8B8FA8] text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-          Decentralized binary prediction markets on Celo.
-          Bet YES or NO on any event using USDm — no ETH, no CELO, no friction.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <button onClick={handleCTA} className="w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-base bg-[#35D07F] text-black hover:bg-[#35D07F]/90 transition-all active:scale-95 shadow-lg shadow-[#35D07F]/25">
-            {isConnected ? "Open App →" : "Start Predicting →"}
-          </button>
-          <button onClick={onCreate} className="w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-base border border-white/20 text-white hover:bg-white/5 transition-all active:scale-95">
-            Create a Market
-          </button>
-        </div>
-        <p className="text-xs text-[#3A3A54]">Non-custodial · Open-source · 2% protocol fee · No CELO needed</p>
-      </div>
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-[#3A3A54] animate-bounce">
-        <span className="text-xs">scroll</span>
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </div>
-    </section>
-  );
-}
 
-// ─── Stats ────────────────────────────────────────────────────────────────────
-function Stats({ totalMarkets }: { totalMarkets: number }) {
   return (
-    <section className="py-12 border-y border-white/[0.05]">
-      <div className="max-w-4xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-        {[
-          { label: "Markets Created", value: totalMarkets, suffix: "+" },
-          { label: "Network Fee", value: 0, suffix: " USDm" },
-          { label: "Block Time", value: 1, suffix: "s" },
-          { label: "Protocol Fee", value: 2, suffix: "%" },
-        ].map((s) => (
-          <div key={s.label} className="space-y-1">
-            <p className="text-2xl sm:text-3xl font-extrabold text-white">
-              <Counter to={s.value} suffix={s.suffix} />
-            </p>
-            <p className="text-xs text-[#5A5A78]">{s.label}</p>
+    <div className="min-h-screen uniforest-bg flex flex-col">
+      {/* Landing nav */}
+      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <UnicornLogo size={32} animated />
+            <UniforesWordmark size="md" />
           </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ─── Live Markets preview ─────────────────────────────────────────────────────
-function LiveMarkets({ markets, onBet }: { markets: Market[]; onBet: (m: Market, side: boolean) => void }) {
-  if (markets.length === 0) return null;
-  return (
-    <section className="py-16 px-4 max-w-5xl mx-auto">
-      <div className="text-center mb-10">
-        <p className="text-[#35D07F] text-sm font-medium mb-2">Live now</p>
-        <h2 className="text-2xl sm:text-3xl font-bold text-white">Open Markets</h2>
-      </div>
-      <div className="grid sm:grid-cols-2 gap-4">
-        {markets.slice(0, 4).map((market) => {
-          const total = market.yesPool + market.noPool;
-          const yesPct = formatPercent(market.yesPool, market.noPool);
-          const ended = Number(market.endTime) < Date.now() / 1000;
-          return (
-            <div key={String(market.id)} className="bg-[#10101C] border border-white/8 rounded-3xl p-5 flex flex-col gap-4 hover:border-[#35D07F]/25 transition-all group">
-              <p className="text-white font-medium text-sm leading-snug line-clamp-2 group-hover:text-[#35D07F]/90 transition-colors">{market.question}</p>
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="text-[#35D07F]">YES {yesPct}%</span>
-                  <span className="text-[#E84040]">NO {100 - yesPct}%</span>
-                </div>
-                <div className="h-2 bg-white/8 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[#35D07F] to-emerald-400" style={{ width: `${yesPct}%` }} />
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-xs text-[#5A5A78]">
-                <span>{formatUSDm(total)} USDm pool</span>
-                <span className={ended ? "text-[#E84040]" : "text-[#FBCC5C]"}>
-                  {market.resolved ? (market.outcome ? "✓ YES won" : "✗ NO won") : timeLeft(market.endTime)}
-                </span>
-              </div>
-              {!market.resolved && !ended && (
-                <div className="flex gap-2">
-                  <button onClick={() => onBet(market, true)} className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#35D07F]/12 text-[#35D07F] border border-[#35D07F]/20 hover:bg-[#35D07F]/20 transition-colors active:scale-95">Bet YES</button>
-                  <button onClick={() => onBet(market, false)} className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#E84040]/12 text-[#E84040] border border-[#E84040]/20 hover:bg-[#E84040]/20 transition-colors active:scale-95">Bet NO</button>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-// ─── How it works ─────────────────────────────────────────────────────────────
-function HowItWorks() {
-  const steps = [
-    { n: "01", icon: "◈", title: "Connect your wallet", desc: "Use MiniPay or any EVM wallet. No ETH needed — network fees are paid automatically in USDm." },
-    { n: "02", icon: "◎", title: "Pick a market", desc: "Browse open markets on crypto, sports, politics, or anything. Bet YES or NO with confidence." },
-    { n: "03", icon: "◉", title: "Place your bet", desc: "Deposit USDm. Your stake goes into the YES or NO pool. Odds adjust in real-time with each bet." },
-    { n: "04", icon: "✦", title: "Claim your winnings", desc: "When the market resolves, winners share the losing pool proportionally. Claim directly to your wallet." },
-  ];
-  return (
-    <section className="py-20 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-[#35D07F] text-sm font-medium mb-2">Simple by design</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">How it works</h2>
+          <div className="flex items-center gap-2">
+            {!isMiniPay() && !isConnected && (
+              <button
+                onClick={() => connect({ connector: injected() })}
+                className="px-4 py-2 text-sm font-bold rounded-xl border border-uniblue/30 text-uniblue hover:bg-uniblue/5 transition-colors"
+              >
+                Conectar
+              </button>
+            )}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={handleCTA}
+              className="px-4 py-2 text-sm font-black rounded-xl text-white shadow-uni-blue"
+              style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6)" }}
+            >
+              {isConnected ? "Abrir App →" : "Começar →"}
+            </motion.button>
+          </div>
         </div>
-        <div className="grid sm:grid-cols-2 gap-5">
-          {steps.map((s) => (
-            <div key={s.n} className="relative bg-[#10101C] border border-white/8 rounded-3xl p-6 hover:border-[#35D07F]/20 transition-all group">
-              <span className="absolute top-4 right-5 text-xs font-mono text-white/8 group-hover:text-[#35D07F]/20 transition-colors">{s.n}</span>
-              <div className="text-3xl mb-4 text-[#35D07F]">{s.icon}</div>
-              <h3 className="text-white font-semibold mb-2">{s.title}</h3>
-              <p className="text-[#5A5A78] text-sm leading-relaxed">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+      </nav>
 
-// ─── Features ─────────────────────────────────────────────────────────────────
-function Features() {
-  const items = [
-    { icon: "⚡", title: "~1s block time", desc: "Celo L2 confirms bets instantly. No waiting, no anxiety." },
-    { icon: "💵", title: "Pay fees in USDm", desc: "CIP-64 fee abstraction. Zero CELO required, ever." },
-    { icon: "📱", title: "MiniPay native", desc: "Auto-connect in MiniPay. Designed for 360×640 screens." },
-    { icon: "📊", title: "Probability charts", desc: "Real on-chain history. See how odds evolved over time." },
-    { icon: "⚖️", title: "Proportional payouts", desc: "Winners split the losing pool by stake share. Fair math." },
-    { icon: "🔍", title: "Fully on-chain", desc: "No backend, no custody. Every bet lives in the contract." },
-  ];
-  return (
-    <section className="py-20 px-4 bg-[#35D07F]/[0.02]">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-[#FBCC5C] text-sm font-medium mb-2">Built on Celo</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">Why CeloPredict?</h2>
-        </div>
-        <div className="grid sm:grid-cols-3 gap-4">
-          {items.map((f) => (
-            <div key={f.title} className="bg-[#10101C] border border-white/8 rounded-2xl p-5 hover:border-[#35D07F]/20 transition-all">
-              <div className="text-2xl mb-3">{f.icon}</div>
-              <h3 className="text-white font-semibold text-sm mb-1">{f.title}</h3>
-              <p className="text-[#5A5A78] text-xs leading-relaxed">{f.desc}</p>
+      {/* Hero */}
+      <section className="flex-1 flex flex-col items-center justify-center px-4 py-20 text-center relative overflow-hidden">
+        {/* BG blobs */}
+        <div className="absolute top-10 left-10 w-64 h-64 bg-blue-100 rounded-full blur-[80px] opacity-50 pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-48 h-48 bg-pink-100 rounded-full blur-[60px] opacity-50 pointer-events-none" />
+
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 max-w-2xl space-y-6"
+        >
+          {/* Logo */}
+          <div className="flex justify-center mb-4">
+            <UnicornLogo size={80} animated />
+          </div>
+
+          {/* Live badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-uniblue/20 text-uniblue text-xs font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-uniblue animate-pulse" />
+            Live na Celo · Taxas em USDm · MiniPay ready
+          </div>
+
+          <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-800 leading-tight tracking-tight">
+            Preveja o futuro.<br />
+            <span className="uni-gradient-text">Ganhe USDm.</span>
+          </h1>
+
+          <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+            Mercados de previsão binários na Celo.
+            Aposte SIM ou NÃO em qualquer evento usando USDm — sem ETH, sem CELO, sem complicação.
+          </p>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={handleCTA}
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl font-black text-base text-white shadow-uni-blue"
+              style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6, #FF007A)" }}
+            >
+              {isConnected ? "Abrir Mercados →" : "Começar a Prever →"}
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={onLaunch}
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl font-bold text-base text-gray-700 border-2 border-gray-200 hover:border-uniblue/30 transition-colors"
+            >
+              Ver Mercados 🔮
+            </motion.button>
+          </div>
+
+          <p className="text-xs text-gray-400">
+            Não-custodial · Open-source · 2% de taxa · Sem CELO necessário
+          </p>
+        </motion.div>
+      </section>
+
+      {/* Stats strip */}
+      <section className="border-t border-gray-100 bg-white/60 backdrop-blur py-8">
+        <div className="max-w-3xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+          {[
+            { label: "Mercados criados", value: Number(total), suffix: "+" },
+            { label: "Taxa de rede",     value: 0,             suffix: " USDm" },
+            { label: "Tempo de bloco",   value: 1,             suffix: "s" },
+            { label: "Taxa do protocolo",value: 2,             suffix: "%" },
+          ].map(s => (
+            <div key={s.label} className="space-y-1">
+              <p className="text-2xl font-extrabold uni-gradient-text">
+                <Counter to={s.value} suffix={s.suffix} />
+              </p>
+              <p className="text-xs text-gray-400">{s.label}</p>
             </div>
           ))}
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Live markets preview */}
+      {markets.length > 0 && (
+        <section className="py-16 px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-8">
+              <p className="text-uniblue text-sm font-semibold mb-1">Ao vivo agora</p>
+              <h2 className="text-2xl font-black text-gray-800">Mercados Abertos</h2>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {markets.slice(0, 4).map((m, i) => (
+                <MarketCard
+                  key={String(m.id)}
+                  market={m}
+                  index={i}
+                  onBet={() => onLaunch()}
+                />
+              ))}
+            </div>
+            <div className="text-center mt-8">
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={onLaunch}
+                className="px-8 py-3.5 rounded-2xl font-black text-white shadow-uni-blue"
+                style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6)" }}
+              >
+                Ver todos os mercados →
+              </motion.button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* How it works */}
+      <section className="py-16 px-4 bg-white/40 backdrop-blur border-y border-gray-100">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-unipink text-sm font-semibold mb-1">Simples e mágico</p>
+            <h2 className="text-2xl font-black text-gray-800">Como funciona</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              { icon: "🦄", step: "01", title: "Conecte sua carteira",        desc: "Use MiniPay ou qualquer carteira EVM. Taxas pagas automaticamente em USDm." },
+              { icon: "🔮", step: "02", title: "Escolha um mercado",          desc: "Navegue por mercados de crypto, esportes, política ou qualquer evento." },
+              { icon: "💎", step: "03", title: "Aposte SIM ou NÃO",           desc: "Deposite USDm. Sua aposta vai para o pool SIM ou NÃO. As odds ajustam em tempo real." },
+              { icon: "✨", step: "04", title: "Resgate seus ganhos",          desc: "Quando o mercado resolve, os vencedores dividem o pool perdedor proporcionalmente." },
+            ].map(s => (
+              <motion.div
+                key={s.step}
+                whileHover={{ y: -4 }}
+                className="bg-white rounded-3xl border border-gray-100 shadow-uni-card p-5 relative overflow-hidden"
+              >
+                <span className="absolute top-3 right-4 text-xs font-mono text-gray-100 font-black text-2xl">{s.step}</span>
+                <div className="text-3xl mb-3">{s.icon}</div>
+                <h3 className="font-black text-gray-800 mb-1.5">{s.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{s.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-16 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-violet-500 text-sm font-semibold mb-1">Construído na Celo</p>
+            <h2 className="text-2xl font-black text-gray-800">Por que Uniforest?</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { icon: "⚡", title: "~1s por bloco",      desc: "Apostas confirmadas na hora." },
+              { icon: "💵", title: "Taxas em USDm",      desc: "CIP-64. Sem CELO, jamais." },
+              { icon: "📱", title: "Nativo no MiniPay",  desc: "Auto-connect. Feito para mobile." },
+              { icon: "📊", title: "Gráficos on-chain",  desc: "Histórico real de probabilidade." },
+              { icon: "⚖️", title: "Payouts justos",     desc: "Proporcional ao stake. Matemática limpa." },
+              { icon: "🔍", title: "100% on-chain",      desc: "Sem backend, sem custódia." },
+            ].map(f => (
+              <div key={f.title} className="bg-white rounded-2xl border border-gray-100 shadow-uni-card p-4">
+                <div className="text-2xl mb-2">{f.icon}</div>
+                <h3 className="font-bold text-gray-800 text-sm mb-1">{f.title}</h3>
+                <p className="text-[11px] text-gray-400 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section className="py-20 px-4 text-center relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-48 bg-gradient-to-t from-blue-50 to-transparent" />
+        </div>
+        <div className="relative max-w-lg mx-auto space-y-5">
+          <div className="text-5xl">🦄✨</div>
+          <h2 className="text-3xl font-extrabold text-gray-800">Pronto para sua primeira previsão?</h2>
+          <p className="text-gray-500 text-sm">Junte-se ao Uniforest. Rápido, barato e totalmente on-chain.</p>
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={handleCTA}
+            className="w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-base text-white shadow-uni-blue"
+            style={{ background: "linear-gradient(135deg, #007AFF, #8B5CF6, #FF007A)" }}
+          >
+            {isConnected ? "Abrir Mercados →" : "Começar Agora →"}
+          </motion.button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-100 py-6 px-4">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+          <div className="flex items-center gap-2">
+            <span className="uni-gradient-text font-black">Uniforest</span>
+            <span>— construído na Celo L2</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <a href="https://celoscan.io" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 transition-colors">Celoscan</a>
+            <a href="https://docs.celo.org" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 transition-colors">Docs</a>
+            <span>Chain ID: 42220</span>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
 
-// ─── Bottom CTA ───────────────────────────────────────────────────────────────
-function BottomCTA({ onLaunch, onCreate }: { onLaunch: () => void; onCreate: () => void }) {
-  return (
-    <section className="py-24 px-4 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#35D07F]/8 rounded-full blur-[100px]" />
-      </div>
-      <div className="relative max-w-xl mx-auto text-center space-y-6">
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Ready to make your first prediction?</h2>
-        <p className="text-[#5A5A78] text-sm">Join the prediction market on Celo. Fast, cheap, and fully on-chain.</p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button onClick={onLaunch} className="px-8 py-3.5 rounded-2xl font-bold text-base bg-[#35D07F] text-black hover:bg-[#35D07F]/90 transition-all active:scale-95 shadow-lg shadow-[#35D07F]/25">
-            Browse Markets →
-          </button>
-          <button onClick={onCreate} className="px-8 py-3.5 rounded-2xl font-bold text-base border border-white/20 text-white hover:bg-white/5 transition-all active:scale-95">
-            Create a Market
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer() {
-  return (
-    <footer className="border-t border-white/[0.05] py-8 px-4">
-      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#3A3A54]">
-        <div className="flex items-center gap-2">
-          <span className="text-[#35D07F]">◈</span>
-          <span>CeloPredict — built on Celo L2</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <a href="https://celoscan.io" target="_blank" rel="noopener noreferrer" className="hover:text-[#8B8FA8] transition-colors">Celoscan</a>
-          <a href="https://docs.celo.org" target="_blank" rel="noopener noreferrer" className="hover:text-[#8B8FA8] transition-colors">Docs</a>
-          <span>Chain ID: 42220</span>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-// ─── Root ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+//  ROOT
+// ══════════════════════════════════════════════════════════════════════════════
 export default function Home() {
-  const [view, setView] = useState<"landing" | "app">("landing");
+  const [view, setView]           = useState<"landing" | "app">("landing");
   const [showCreate, setShowCreate] = useState(false);
-  const [betState, setBetState] = useState<{ market: Market; side: boolean } | null>(null);
-  const { markets, total } = useMarkets(4);
 
   // MiniPay users skip landing entirely
   useEffect(() => {
     if (isMiniPay()) setView("app");
   }, []);
 
-  // Full app experience (bottom-nav + charts + leaderboard + my bets)
-  if (view === "app") {
-    return <PredictionMarket />;
-  }
-
-  // Landing page
   return (
-    <div className="min-h-screen bg-[#0A0A14] text-white">
-      <Nav onLaunch={() => setView("app")} />
-      <Hero onLaunch={() => setView("app")} onCreate={() => setShowCreate(true)} />
-      <Stats totalMarkets={Number(total)} />
-      <LiveMarkets markets={markets} onBet={(m, side) => setBetState({ market: m, side })} />
-      <HowItWorks />
-      <Features />
-      <BottomCTA onLaunch={() => setView("app")} onCreate={() => setShowCreate(true)} />
-      <Footer />
+    <>
+      <SparklesCursor />
 
-      {betState && (
-        <BetModal
-          market={betState.market}
-          initialSide={betState.side}
-          onClose={() => setBetState(null)}
-          onSuccess={() => setBetState(null)}
-        />
+      {view === "app" ? (
+        <UniforesApp onCreateMarket={() => setShowCreate(true)} />
+      ) : (
+        <LandingHero onLaunch={() => setView("app")} />
       )}
+
       {showCreate && (
         <CreateMarketModal
           onClose={() => setShowCreate(false)}
           onSuccess={() => setShowCreate(false)}
         />
       )}
-    </div>
+    </>
   );
 }
