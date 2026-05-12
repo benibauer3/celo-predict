@@ -373,18 +373,46 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           {/* Live badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-uniblue/20 text-uniblue text-xs font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-uniblue animate-pulse" />
-            Live on Celo · Fees in USDm · MiniPay ready
+            Live on Celo · Rewards in USDm &amp; USDT · MiniPay ready
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-800 leading-tight tracking-tight">
             Predict the future.<br />
-            <span className="uni-gradient-text">Win USDm.</span>
+            <span className="uni-gradient-text">Earn USDm & USDT.</span>
           </h1>
 
           <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Binary prediction markets on Celo.
-            Bet YES or NO on any event using USDm — no ETH, no CELO, no friction.
+            Binary prediction markets on Celo. Bet YES or NO on any event —
+            stakes and winnings are always in <strong className="text-gray-700">USDm</strong> or{" "}
+            <strong className="text-gray-700">USDT</strong>. No ETH, no CELO, no friction.
           </p>
+
+          {/* Token badges */}
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <span className="text-lg">💵</span>
+              <div className="text-left">
+                <p className="text-xs font-black text-gray-800">USDm</p>
+                <p className="text-[10px] text-gray-400">Mento Dollar</p>
+              </div>
+            </div>
+            <span className="text-gray-300 font-bold">+</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <span className="text-lg">💲</span>
+              <div className="text-left">
+                <p className="text-xs font-black text-gray-800">USDT</p>
+                <p className="text-[10px] text-gray-400">Tether USD</p>
+              </div>
+            </div>
+            <span className="text-gray-300 font-bold">=</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-pink-50 border border-uniblue/20 rounded-2xl shadow-sm">
+              <span className="text-lg">🦄</span>
+              <div className="text-left">
+                <p className="text-xs font-black uni-gradient-text">Your wins</p>
+                <p className="text-[10px] text-gray-400">paid out instantly</p>
+              </div>
+            </div>
+          </div>
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
@@ -406,7 +434,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           </div>
 
           <p className="text-xs text-gray-400">
-            Non-custodial · Open-source · 2% protocol fee · No CELO needed
+            Non-custodial · Open-source · 2% protocol fee · Rewards in USDm & USDT
           </p>
         </motion.div>
       </section>
@@ -471,10 +499,10 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {[
-              { icon: "🦄", step: "01", title: "Connect your wallet",   desc: "Use MiniPay or any EVM wallet. Network fees are paid automatically in USDm." },
+              { icon: "🦄", step: "01", title: "Connect your wallet",   desc: "Use MiniPay or any EVM wallet. Gas fees are paid automatically in USDm — no CELO needed." },
               { icon: "🔮", step: "02", title: "Pick a market",         desc: "Browse markets on crypto, sports, politics, or any event you care about." },
-              { icon: "💎", step: "03", title: "Bet YES or NO",         desc: "Deposit USDm. Your stake goes into the YES or NO pool. Odds adjust in real time." },
-              { icon: "✨", step: "04", title: "Claim your winnings",   desc: "When a market resolves, winners split the losing pool proportionally to their stake." },
+              { icon: "💎", step: "03", title: "Bet YES or NO",         desc: "Stake USDm or USDT. Your bet goes into the YES or NO pool. Odds update in real time with every new bet." },
+              { icon: "✨", step: "04", title: "Claim your rewards",    desc: "Winners receive their original stake plus a share of the losing pool — paid out in USDm or USDT, instantly on-chain." },
             ].map(s => (
               <motion.div
                 key={s.step}
@@ -500,17 +528,47 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
-              { icon: "⚡", title: "~1s block time",      desc: "Bets confirmed instantly." },
-              { icon: "💵", title: "Fees in USDm",       desc: "CIP-64 fee abstraction. Zero CELO, ever." },
-              { icon: "📱", title: "MiniPay native",     desc: "Auto-connect. Designed for mobile." },
-              { icon: "📊", title: "On-chain charts",    desc: "Real probability history from events." },
-              { icon: "⚖️", title: "Fair payouts",       desc: "Proportional to stake. Clean math." },
-              { icon: "🔍", title: "100% on-chain",      desc: "No backend, no custody." },
+              { icon: "⚡", title: "~1s block time",         desc: "Bets confirmed instantly on Celo L2." },
+              { icon: "💵", title: "USDm & USDT rewards", desc: "All winnings paid in stablecoins. No price risk on your rewards." },
+              { icon: "📱", title: "MiniPay native",      desc: "Auto-connect in MiniPay. Designed for mobile-first users." },
+              { icon: "📊", title: "On-chain charts",     desc: "Real probability history from on-chain events." },
+              { icon: "⚖️", title: "Fair payouts",        desc: "Winners split the losing pool proportionally. Clean, transparent math." },
+              { icon: "🔍", title: "100% on-chain",       desc: "No backend, no custody. Every bet and reward lives in the contract." },
             ].map(f => (
               <div key={f.title} className="bg-white rounded-2xl border border-gray-100 shadow-uni-card p-4">
                 <div className="text-2xl mb-2">{f.icon}</div>
                 <h3 className="font-bold text-gray-800 text-sm mb-1">{f.title}</h3>
                 <p className="text-[11px] text-gray-400 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Rewards callout */}
+      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 via-white to-pink-50 border-y border-gray-100">
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          <p className="text-uniblue text-sm font-semibold">Stablecoin rewards</p>
+          <h2 className="text-2xl font-black text-gray-800">
+            Your winnings. Always in stablecoins.
+          </h2>
+          <p className="text-gray-500 text-sm max-w-md mx-auto leading-relaxed">
+            Every payout on Uniforest is settled in{" "}
+            <strong className="text-gray-800">USDm</strong> or{" "}
+            <strong className="text-gray-800">USDT</strong> — no volatile tokens, no slippage surprises.
+            What you win is exactly what lands in your wallet.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            {[
+              { token: "USDm", sub: "Mento Dollar · native to Celo", color: "from-uniblue to-blue-400", emoji: "💵" },
+              { token: "USDT", sub: "Tether USD · widely accepted",  color: "from-unipink to-pink-400", emoji: "💲" },
+            ].map(t => (
+              <div key={t.token} className="flex-1 max-w-[220px] bg-white rounded-3xl border border-gray-100 shadow-uni-card p-5 text-center space-y-2">
+                <div className={`w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br ${t.color} flex items-center justify-center text-2xl`}>
+                  {t.emoji}
+                </div>
+                <p className="text-lg font-black text-gray-800">{t.token}</p>
+                <p className="text-[11px] text-gray-400 leading-snug">{t.sub}</p>
               </div>
             ))}
           </div>
@@ -524,8 +582,8 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
         </div>
         <div className="relative max-w-lg mx-auto space-y-5">
           <div className="text-5xl">🦄✨</div>
-          <h2 className="text-3xl font-extrabold text-gray-800">Ready to make your first prediction?</h2>
-          <p className="text-gray-500 text-sm">Join Uniforest. Fast, cheap, and fully on-chain.</p>
+          <h2 className="text-3xl font-extrabold text-gray-800">Ready to earn your first USDm reward?</h2>
+          <p className="text-gray-500 text-sm">Join Uniforest. Predict, win, and get paid in stablecoins.</p>
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={handleCTA}
