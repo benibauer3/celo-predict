@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --celo-green: #35D07F;
+  --celo-dark: #1A1A2E;
+}
+
+body {
+  background-color: #0F0F1A;
+  color: #F0F0F0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* MiniPay targets 360×640 — ensure nothing overflows */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

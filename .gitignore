@@ -1,0 +1,22 @@
+# Next.js
+.next/
+out/
+
+# Hardhat
+artifacts/
+cache/
+typechain-types/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Deps
+node_modules/
+
+# OS
+.DS_Store
+
+# Vercel
+.vercel/
