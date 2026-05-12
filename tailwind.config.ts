@@ -15,6 +15,10 @@ const config: Config = {
         // Uniforest brand palette
         unipink: "#FF007A",
         uniblue: "#007AFF",
+        // Suerte Market brand
+        "suerte-pink": "#FF007A",
+        "suerte-blue": "#007AFF",
+        "suerte-bg":   "#FFFFFF",
         uniforest: {
           bg: "#FAFAFA",
           card: "#FFFFFF",
