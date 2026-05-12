@@ -373,7 +373,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           {/* Live badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-uniblue/20 text-uniblue text-xs font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-uniblue animate-pulse" />
-            Live on Celo · Rewards in USDm &amp; USDT · MiniPay ready
+            Live on Celo · Fees in USDT, USDC, USDm or CELO · MiniPay ready
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-800 leading-tight tracking-tight">
@@ -382,35 +382,33 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           </h1>
 
           <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Binary prediction markets on Celo. Bet YES or NO on any event —
-            stakes and winnings are always in <strong className="text-gray-700">USDm</strong> or{" "}
-            <strong className="text-gray-700">USDT</strong>. No ETH, no CELO, no friction.
+            Binary prediction markets on Celo. Bet YES or NO on any event.
+            Pay network fees in <strong className="text-gray-700">USDT</strong>,{" "}
+            <strong className="text-gray-700">USDC</strong>,{" "}
+            <strong className="text-gray-700">USDm</strong> or{" "}
+            <strong className="text-gray-700">CELO</strong> — your choice, zero friction.
           </p>
 
-          {/* Token badges */}
-          <div className="flex items-center justify-center gap-3">
-            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-2xl shadow-sm">
-              <span className="text-lg">💵</span>
-              <div className="text-left">
-                <p className="text-xs font-black text-gray-800">USDm</p>
-                <p className="text-[10px] text-gray-400">Mento Dollar</p>
-              </div>
-            </div>
-            <span className="text-gray-300 font-bold">+</span>
-            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-2xl shadow-sm">
-              <span className="text-lg">💲</span>
-              <div className="text-left">
-                <p className="text-xs font-black text-gray-800">USDT</p>
-                <p className="text-[10px] text-gray-400">Tether USD</p>
-              </div>
-            </div>
-            <span className="text-gray-300 font-bold">=</span>
-            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-pink-50 border border-uniblue/20 rounded-2xl shadow-sm">
-              <span className="text-lg">🦄</span>
-              <div className="text-left">
-                <p className="text-xs font-black uni-gradient-text">Your wins</p>
-                <p className="text-[10px] text-gray-400">paid out instantly</p>
-              </div>
+          {/* Fee token badges */}
+          <div className="w-full max-w-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">
+              Pay network fees with
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { emoji: "💲", label: "USDT",  color: "border-green-200 bg-green-50" },
+                { emoji: "🔵", label: "USDC",  color: "border-blue-200 bg-blue-50"  },
+                { emoji: "💵", label: "USDm",  color: "border-violet-200 bg-violet-50" },
+                { emoji: "🟡", label: "CELO",  color: "border-yellow-200 bg-yellow-50" },
+              ].map(t => (
+                <div
+                  key={t.label}
+                  className={`flex flex-col items-center gap-1 px-2 py-2.5 rounded-2xl border ${t.color}`}
+                >
+                  <span className="text-base leading-none">{t.emoji}</span>
+                  <span className="text-[11px] font-black text-gray-800">{t.label}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -434,7 +432,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           </div>
 
           <p className="text-xs text-gray-400">
-            Non-custodial · Open-source · 2% protocol fee · Rewards in USDm & USDT
+            Non-custodial · Open-source · 2% protocol fee · Fees in USDT / USDC / USDm / CELO
           </p>
         </motion.div>
       </section>
@@ -444,7 +442,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
         <div className="max-w-3xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           {[
             { label: "Markets created",  value: Number(total), suffix: "+" },
-            { label: "Network fee",      value: 0,             suffix: " USDm" },
+            { label: "Network fee",      value: 0,             suffix: " (any token)" },
             { label: "Block time",       value: 1,             suffix: "s" },
             { label: "Protocol fee",     value: 2,             suffix: "%" },
           ].map(s => (
@@ -499,7 +497,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {[
-              { icon: "🦄", step: "01", title: "Connect your wallet",   desc: "Use MiniPay or any EVM wallet. Gas fees are paid automatically in USDm — no CELO needed." },
+              { icon: "🦄", step: "01", title: "Connect your wallet",   desc: "Use MiniPay or any EVM wallet. Pay network fees in USDT, USDC, USDm or CELO — whatever you have." },
               { icon: "🔮", step: "02", title: "Pick a market",         desc: "Browse markets on crypto, sports, politics, or any event you care about." },
               { icon: "💎", step: "03", title: "Bet YES or NO",         desc: "Stake USDm or USDT. Your bet goes into the YES or NO pool. Odds update in real time with every new bet." },
               { icon: "✨", step: "04", title: "Claim your rewards",    desc: "Winners receive their original stake plus a share of the losing pool — paid out in USDm or USDT, instantly on-chain." },
@@ -529,7 +527,7 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
               { icon: "⚡", title: "~1s block time",         desc: "Bets confirmed instantly on Celo L2." },
-              { icon: "💵", title: "USDm & USDT rewards", desc: "All winnings paid in stablecoins. No price risk on your rewards." },
+              { icon: "💳", title: "Flexible fee tokens",  desc: "Pay gas in USDT, USDC, USDm or CELO — Celo's CIP-64 fee abstraction lets you use any token." },
               { icon: "📱", title: "MiniPay native",      desc: "Auto-connect in MiniPay. Designed for mobile-first users." },
               { icon: "📊", title: "On-chain charts",     desc: "Real probability history from on-chain events." },
               { icon: "⚖️", title: "Fair payouts",        desc: "Winners split the losing pool proportionally. Clean, transparent math." },
@@ -545,33 +543,79 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
         </div>
       </section>
 
-      {/* Rewards callout */}
+      {/* Tokens callout */}
       <section className="py-16 px-4 bg-gradient-to-br from-blue-50 via-white to-pink-50 border-y border-gray-100">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <p className="text-uniblue text-sm font-semibold">Stablecoin rewards</p>
-          <h2 className="text-2xl font-black text-gray-800">
-            Your winnings. Always in stablecoins.
-          </h2>
-          <p className="text-gray-500 text-sm max-w-md mx-auto leading-relaxed">
-            Every payout on Uniforest is settled in{" "}
-            <strong className="text-gray-800">USDm</strong> or{" "}
-            <strong className="text-gray-800">USDT</strong> — no volatile tokens, no slippage surprises.
-            What you win is exactly what lands in your wallet.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-            {[
-              { token: "USDm", sub: "Mento Dollar · native to Celo", color: "from-uniblue to-blue-400", emoji: "💵" },
-              { token: "USDT", sub: "Tether USD · widely accepted",  color: "from-unipink to-pink-400", emoji: "💲" },
-            ].map(t => (
-              <div key={t.token} className="flex-1 max-w-[220px] bg-white rounded-3xl border border-gray-100 shadow-uni-card p-5 text-center space-y-2">
-                <div className={`w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br ${t.color} flex items-center justify-center text-2xl`}>
-                  {t.emoji}
+        <div className="max-w-3xl mx-auto space-y-10">
+
+          {/* Rewards row */}
+          <div className="text-center space-y-4">
+            <p className="text-uniblue text-sm font-semibold">Stablecoin rewards</p>
+            <h2 className="text-2xl font-black text-gray-800">
+              Your winnings. Always in stablecoins.
+            </h2>
+            <p className="text-gray-500 text-sm max-w-md mx-auto leading-relaxed">
+              Every payout is settled in{" "}
+              <strong className="text-gray-800">USDm</strong> or{" "}
+              <strong className="text-gray-800">USDT</strong> — no volatile tokens, no slippage.
+              What you win is exactly what lands in your wallet.
+            </p>
+            <div className="flex items-center justify-center gap-4 pt-1">
+              {[
+                { token: "USDm", sub: "Mento Dollar · native to Celo", color: "from-uniblue to-blue-400",   emoji: "💵" },
+                { token: "USDT", sub: "Tether USD · widely accepted",   color: "from-unipink to-pink-400",   emoji: "💲" },
+              ].map(t => (
+                <div key={t.token} className="flex-1 max-w-[200px] bg-white rounded-3xl border border-gray-100 shadow-uni-card p-5 text-center space-y-2">
+                  <div className={`w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br ${t.color} flex items-center justify-center text-2xl`}>
+                    {t.emoji}
+                  </div>
+                  <p className="text-lg font-black text-gray-800">{t.token}</p>
+                  <p className="text-[11px] text-gray-400 leading-snug">{t.sub}</p>
                 </div>
-                <p className="text-lg font-black text-gray-800">{t.token}</p>
-                <p className="text-[11px] text-gray-400 leading-snug">{t.sub}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">also</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          {/* Fee tokens row */}
+          <div className="text-center space-y-4">
+            <p className="text-violet-500 text-sm font-semibold">Flexible gas fees</p>
+            <h2 className="text-2xl font-black text-gray-800">
+              Pay network fees with any token.
+            </h2>
+            <p className="text-gray-500 text-sm max-w-md mx-auto leading-relaxed">
+              Thanks to Celo's <strong className="text-gray-800">CIP-64 fee abstraction</strong>,
+              you can pay transaction fees in{" "}
+              <strong className="text-gray-800">USDT</strong>,{" "}
+              <strong className="text-gray-800">USDC</strong>,{" "}
+              <strong className="text-gray-800">USDm</strong> or{" "}
+              <strong className="text-gray-800">CELO</strong> — no need to hold a specific gas token.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+              {[
+                { token: "USDT", sub: "Tether",       emoji: "💲", border: "border-green-200",  bg: "bg-green-50"  },
+                { token: "USDC", sub: "Circle",        emoji: "🔵", border: "border-blue-200",   bg: "bg-blue-50"   },
+                { token: "USDm", sub: "Mento",         emoji: "💵", border: "border-violet-200", bg: "bg-violet-50" },
+                { token: "CELO", sub: "Native token",  emoji: "🟡", border: "border-yellow-200", bg: "bg-yellow-50" },
+              ].map(t => (
+                <div key={t.token}
+                  className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl border ${t.border} ${t.bg} shadow-sm`}
+                >
+                  <span className="text-xl leading-none">{t.emoji}</span>
+                  <div className="text-left">
+                    <p className="text-sm font-black text-gray-800">{t.token}</p>
+                    <p className="text-[10px] text-gray-400">{t.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </section>
 
