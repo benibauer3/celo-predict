@@ -1,8 +1,6 @@
-import { celo, celoAlfajores } from "viem/chains";
+import { ACTIVE_CHAIN } from "./chains";
 
-// ─── Network Config ───────────────────────────────────────────────────────────
-const chainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 11142220);
-export const ACTIVE_CHAIN = chainId === 42220 ? celo : celoAlfajores;
+export { ACTIVE_CHAIN };
 
 // ─── Addresses ────────────────────────────────────────────────────────────────
 export const CONTRACT_ADDRESS = (
@@ -10,12 +8,15 @@ export const CONTRACT_ADDRESS = (
   "0x0000000000000000000000000000000000000000"
 ) as `0x${string}`;
 
-// USDm token addresses (token address = feeCurrency address for 18-decimal tokens)
-export const USDM_MAINNET = "0x765DE816845861e75A25fCA122bb6898B8B1282a" as const;
-export const USDM_TESTNET = "0xEF4d55D6dE8e8d73232827Cd1e9b2F2dBb45bC80" as const;
-export const USDM_ADDRESS = (chainId === 42220 ? USDM_MAINNET : USDM_TESTNET) as `0x${string}`;
+const chainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 11142220);
 
-// USDm is its own feeCurrency adapter (18 decimals — no adapter needed)
+// USDm — token address == feeCurrency address (18 decimals, no adapter needed)
+export const USDM_ADDRESS = (
+  chainId === 42220
+    ? "0x765DE816845861e75A25fCA122bb6898B8B1282a"
+    : "0xEF4d55D6dE8e8d73232827Cd1e9b2F2dBb45bC80"
+) as `0x${string}`;
+
 export const USDM_FEE_CURRENCY = USDM_ADDRESS;
 
 // ─── ABIs ─────────────────────────────────────────────────────────────────────
@@ -40,13 +41,6 @@ export const ERC20_ABI = [
     stateMutability: "view",
     inputs: [{ name: "account", type: "address" }],
     outputs: [{ name: "", type: "uint256" }],
-  },
-  {
-    name: "decimals",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ name: "", type: "uint8" }],
   },
 ] as const;
 

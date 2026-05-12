@@ -1,22 +1,20 @@
 "use client";
 
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { celo, celoAlfajores } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { injected } from "wagmi/connectors";
 import { useEffect } from "react";
 import { useConnect } from "wagmi";
+import { celo, celoSepolia } from "@/lib/chains";
 
-const chainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 11142220);
-const activeChain = chainId === 42220 ? celo : celoAlfajores;
-const rpcUrl = chainId === 42220
-  ? "https://forno.celo.org"
-  : "https://forno.celo-sepolia.celo-testnet.org";
-
+// Support both chains — user's wallet decides which is active
 const wagmiConfig = createConfig({
-  chains: [activeChain],
+  chains: [celo, celoSepolia],
   connectors: [injected()],
-  transports: { [activeChain.id]: http(rpcUrl) },
+  transports: {
+    [celo.id]:       http("https://forno.celo.org"),
+    [celoSepolia.id]: http("https://forno.celo-sepolia.celo-testnet.org"),
+  },
   ssr: true,
 });
 
@@ -27,7 +25,10 @@ const queryClient = new QueryClient({
 function MiniPayAutoConnect() {
   const { connect, connectors } = useConnect();
   useEffect(() => {
-    if (typeof window !== "undefined" && (window as { ethereum?: { isMiniPay?: boolean } }).ethereum?.isMiniPay) {
+    if (
+      typeof window !== "undefined" &&
+      (window as { ethereum?: { isMiniPay?: boolean } }).ethereum?.isMiniPay
+    ) {
       connect({ connector: connectors[0] });
     }
   }, [connect, connectors]);

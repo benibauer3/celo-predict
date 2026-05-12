@@ -463,7 +463,7 @@ function MyBetsTab({ markets, onRefresh }: { markets: Market[]; onRefresh: () =>
   const totalInvested = positions.reduce((a, p) => a + p.invested, 0n);
   const totalPnL = positions.reduce((a, p) => a + p.pnl, 0n);
   const claimable = positions.filter(
-    (p) => p.market.resolved && !p.position.claimed && p.payout > 0n
+    (p) => p.market.resolved && !p.claimed && p.payout > 0n
   );
 
   if (!isConnected) {
@@ -529,7 +529,7 @@ function MyBetsTab({ markets, onRefresh }: { markets: Market[]; onRefresh: () =>
       </div>
 
       {/* Positions list */}
-      {positions.map(({ market, invested, pnl, pnlPercent, payout, isWinner, position }) => (
+      {positions.map(({ market, invested, pnl, pnlPercent, payout, isWinner, yesAmount, noAmount, claimed }) => (
         <div
           key={String(market.id)}
           className={`bg-[#10101C] border rounded-3xl p-4 space-y-3 ${
@@ -555,16 +555,16 @@ function MyBetsTab({ markets, onRefresh }: { markets: Market[]; onRefresh: () =>
 
           {/* Bet breakdown */}
           <div className="flex gap-2">
-            {position.yesAmount > 0n && (
+            {yesAmount > 0n && (
               <div className="flex-1 bg-[#35D07F]/8 border border-[#35D07F]/15 rounded-2xl px-3 py-2 text-center">
                 <p className="text-[#35D07F] text-xs font-bold">YES</p>
-                <p className="text-white text-sm font-mono mt-0.5">{formatUSDm(position.yesAmount)}</p>
+                <p className="text-white text-sm font-mono mt-0.5">{formatUSDm(yesAmount)}</p>
               </div>
             )}
-            {position.noAmount > 0n && (
+            {noAmount > 0n && (
               <div className="flex-1 bg-[#E84040]/8 border border-[#E84040]/15 rounded-2xl px-3 py-2 text-center">
                 <p className="text-[#E84040] text-xs font-bold">NO</p>
-                <p className="text-white text-sm font-mono mt-0.5">{formatUSDm(position.noAmount)}</p>
+                <p className="text-white text-sm font-mono mt-0.5">{formatUSDm(noAmount)}</p>
               </div>
             )}
             <div className="flex-1 bg-white/[0.04] border border-white/8 rounded-2xl px-3 py-2 text-center">
@@ -579,7 +579,7 @@ function MyBetsTab({ markets, onRefresh }: { markets: Market[]; onRefresh: () =>
           </div>
 
           {/* Claim button */}
-          {market.resolved && !position.claimed && payout > 0n && (
+          {market.resolved && !claimed && payout > 0n && (
             <button
               onClick={async () => {
                 const ok = await claimWinnings(market.id);
@@ -598,7 +598,7 @@ function MyBetsTab({ markets, onRefresh }: { markets: Market[]; onRefresh: () =>
               )}
             </button>
           )}
-          {market.resolved && position.claimed && (
+          {market.resolved && claimed && (
             <p className="text-center text-xs text-[#3A3A54]">Claimed ✓</p>
           )}
         </div>

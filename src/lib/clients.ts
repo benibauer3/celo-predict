@@ -1,5 +1,5 @@
 import { createPublicClient, http } from "viem";
-import { ACTIVE_CHAIN } from "./contract";
+import { ACTIVE_CHAIN } from "./chains";
 
 export const publicClient = createPublicClient({
   chain: ACTIVE_CHAIN,

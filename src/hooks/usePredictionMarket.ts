@@ -347,13 +347,8 @@ async function sendTx(
   to: `0x${string}`,
   data: `0x${string}`
 ) {
-  return walletClient.sendTransaction({
-    account,
-    to,
-    data,
-    // CIP-64: pay network fee in USDm (no CELO needed)
-    feeCurrency: USDM_FEE_CURRENCY as `0x${string}`,
-  } as Parameters<typeof walletClient.sendTransaction>[0]);
+  // @ts-expect-error feeCurrency is Celo CIP-64 — not yet in upstream viem types
+  return walletClient.sendTransaction({ account, to, data, feeCurrency: USDM_FEE_CURRENCY });
 }
 
 async function ensureApproval(
