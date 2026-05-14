@@ -6,6 +6,13 @@ import { type Market } from "@/hooks/usePredictionMarket";
 import { useMarketActions, useUSDmBalance } from "@/hooks/usePredictionMarket";
 import { formatUSDm } from "@/lib/clients";
 
+const MINIPAY_DEPOSIT_DEEPLINK = "https://minipay.opera.com/add_cash";
+
+function isMiniPay() {
+  return typeof window !== "undefined" &&
+    (window as { ethereum?: { isMiniPay?: boolean } }).ethereum?.isMiniPay === true;
+}
+
 interface Props {
   market: Market | null;
   initialSide: "yes" | "no";
@@ -180,7 +187,7 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                     </div>
                   </div>
 
-                  {/* Balance */}
+                  {/* Balance row */}
                   <div className="flex items-center justify-between text-xs text-gray-400">
                     <span>Available balance</span>
                     <span className="font-semibold text-gray-600">{formatUSDm(balance)} USDm</span>
@@ -202,18 +209,32 @@ export function BettingDrawer({ market, initialSide, onClose }: Props) {
                     <p className="text-xs text-red-500 bg-red-50 rounded-xl px-3 py-2">{error}</p>
                   )}
 
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => { if (amountNum > 0) setStep("confirm"); }}
-                    disabled={amountNum <= 0}
-                    className="w-full py-4 rounded-2xl text-base font-black text-white disabled:opacity-40"
-                    style={{ background: isBlue
-                      ? "linear-gradient(135deg, #007AFF, #60A5FA)"
-                      : "linear-gradient(135deg, #FF007A, #FB7185)"
-                    }}
-                  >
-                    Continue →
-                  </motion.button>
+                  {/* Insufficient balance → MiniPay Deposit deeplink (MiniPay req §6) */}
+                  {amountNum > 0 && balance < BigInt(Math.round(amountNum * 1e18)) ? (
+                    <motion.a
+                      whileTap={{ scale: 0.95 }}
+                      href={isMiniPay() ? MINIPAY_DEPOSIT_DEEPLINK : undefined}
+                      onClick={!isMiniPay() ? undefined : undefined}
+                      target={isMiniPay() ? "_self" : undefined}
+                      className="w-full py-4 rounded-2xl text-base font-black text-white flex items-center justify-center gap-2"
+                      style={{ background: "linear-gradient(135deg, #F59E0B, #EF4444)" }}
+                    >
+                      💳 Deposit to Continue
+                    </motion.a>
+                  ) : (
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => { if (amountNum > 0) setStep("confirm"); }}
+                      disabled={amountNum <= 0}
+                      className="w-full py-4 rounded-2xl text-base font-black text-white disabled:opacity-40"
+                      style={{ background: isBlue
+                        ? "linear-gradient(135deg, #007AFF, #60A5FA)"
+                        : "linear-gradient(135deg, #FF007A, #FB7185)"
+                      }}
+                    >
+                      Continue →
+                    </motion.button>
+                  )}
                 </div>
               )}
 

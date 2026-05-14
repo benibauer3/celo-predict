@@ -174,6 +174,17 @@ function UniforesApp({ onCreateMarket }: { onCreateMarket: () => void }) {
         initialSide={drawerSide}
         onClose={() => setDrawerMarket(null)}
       />
+
+      {/* ── Legal footer (MiniPay requirement §7) ──────────────────── */}
+      <div className="pb-28 pt-2 text-center">
+        <div className="flex items-center justify-center gap-3 text-[10px] text-gray-400">
+          <a href="/terms"   className="hover:text-gray-600 transition-colors">Terms of Service</a>
+          <span>·</span>
+          <a href="/privacy" className="hover:text-gray-600 transition-colors">Privacy Policy</a>
+          <span>·</span>
+          <a href="https://t.me/suertemarket" target="_blank" rel="noreferrer" className="hover:text-gray-600 transition-colors">Support</a>
+        </div>
+      </div>
     </div>
   );
 }
@@ -648,6 +659,8 @@ function LandingHero({ onLaunch }: { onLaunch: () => void }) {
           <div className="flex items-center gap-4">
             <a href="https://celoscan.io" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 transition-colors">Celoscan</a>
             <a href="https://docs.celo.org" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 transition-colors">Docs</a>
+            <a href="/terms" className="hover:text-gray-600 transition-colors">Terms</a>
+            <a href="/privacy" className="hover:text-gray-600 transition-colors">Privacy</a>
             <span>Chain ID: 42220</span>
           </div>
         </div>

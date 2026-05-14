@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { SuerteLogoHorizontal } from "@/components/suerte/SuerteLogo";
 import { useUSDmBalance } from "@/hooks/usePredictionMarket";
 import { formatUSDm } from "@/lib/clients";
+
+const SUPPORT_LINK = "https://t.me/suertemarket"; // Telegram support channel
 
 interface Props {
   search: string;
@@ -24,6 +27,14 @@ export function UnicornHeader({ search, setSearch, onCreateMarket }: Props) {
   const { disconnect } = useDisconnect();
   const balance = useUSDmBalance();
 
+  // Auto-connect when running inside MiniPay (zero-click connect requirement)
+  useEffect(() => {
+    if (isMiniPay() && !isConnected) {
+      connect({ connector: injected() });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100">
       {/* ── Top bar ────────────────────────────────────────────────── */}
@@ -31,8 +42,19 @@ export function UnicornHeader({ search, setSearch, onCreateMarket }: Props) {
         {/* Logo */}
         <SuerteLogoHorizontal size={36} />
 
-        {/* Wallet */}
+        {/* Right side: support + wallet */}
         <div className="flex items-center gap-2">
+          {/* In-app support link (MiniPay requirement §6) */}
+          <a
+            href={SUPPORT_LINK}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Support"
+            className="w-8 h-8 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-base hover:bg-gray-100 transition-colors"
+            title="Get help"
+          >
+            🆘
+          </a>
           {isConnected && address ? (
             <>
               {/* Balance badge */}
